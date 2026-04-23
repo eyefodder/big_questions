@@ -152,6 +152,71 @@ Where:
 - Theme summary is a short phrase naming 2-4 recurring themes (e.g. "self-improving software, org design, signal-vs-noise").
 - If fewer than 8 questions were committed, append to the body: `" Set is incomplete; a second-pass elicitation is recommended."`
 
+## End-of-session retro
+
+After the log append succeeds, run a short wrap-up retro with the user before signing off. The tone is conversational — "before we finish, one more thing" — not a form or a survey. Ask the questions one at a time and wait for each answer before moving to the next. Do not batch them, do not dump them as a numbered list.
+
+Ask, in order, phrased naturally in your own words. Approximate phrasings:
+
+1. "Before we finish — how did this go for you? (one sentence is fine)"
+2. "Did you leave with questions you'd defend publicly? If yes, which one(s)? If no, what got in the way?"
+3. "Where did I push you effectively? (One concrete moment, if you can.)"
+4. "Where did I let you off easy when I should have pushed harder?"
+5. "One specific change that would have made this better?"
+
+Run the retro even if the user was terse throughout the interview — the retro is where thin feedback gets a last chance to surface. If the user tries to wave it off with "no feedback," push once gently: "Even one observation is useful." If they're still rushed, accept whatever they give and mark unanswered prompts as `(skipped)` in the file — do not accept a fully empty retro silently.
+
+### Writing the feedback file
+
+After the final answer, write to `./meta/feedback_elicit_<YYYY-MM-DD>.md`. If a file already exists at that path (same-day retry), append a numeric suffix: `_2`, `_3`, ... — never clobber a prior session's feedback.
+
+**Resolving the `version:` field.** Try to capture the big_questions commit SHA so the feedback is tied to the skill revision that produced it:
+
+1. Resolve this SKILL.md's real path (follow the symlink from `~/.claude/skills/inquiry-elicit/` back to the repo).
+2. From that path, find the repo root (the enclosing `big_questions/` directory).
+3. Run `git -C <repo> rev-parse --short HEAD` via the bash tool.
+4. If git is unavailable, the path doesn't resolve, or the command fails for any reason, set `version: unknown`. Never fail the retro over this — the user's answers matter more than the SHA.
+
+File content (fill answers verbatim as the user gave them; preserve their words, don't paraphrase):
+
+```markdown
+---
+skill: inquiry-elicit
+date: YYYY-MM-DD
+version: <sha-or-unknown>
+---
+
+# Session feedback — inquiry-elicit — YYYY-MM-DD
+
+## How did this go? (one sentence)
+
+<answer>
+
+## Did you leave with questions you'd defend publicly?
+
+<answer>
+
+## Where did the skill push you effectively?
+
+<answer>
+
+## Where did the skill let you off easy?
+
+<answer>
+
+## One specific change that would have made this better
+
+<answer>
+```
+
+### Final message to the user
+
+After the file is written, tell the user where it is and offer the issue-template URL. Something like:
+
+> Saved your feedback to `./meta/feedback_elicit_<YYYY-MM-DD>.md`. If you'd like to share it back to help improve the skill, file an issue using this template: https://github.com/eyefodder/big_questions/issues/new?template=skill_feedback.yml — no pressure, it's your file.
+
+Keep the tone warm and low-friction. The file is the user's by default; sharing is opt-in.
+
 ## Failure modes
 
 | Failure | Handling |
@@ -162,6 +227,8 @@ Where:
 | Duplicate slug | Append a numeric disambiguator (`-2`, `-3`, ...). Do not silently overwrite. |
 | Fewer than 8 specific questions | Write what survived the quality bar. Log the shortfall. Recommend a second session. Do not pad. |
 | User wants to re-elicit over an existing set | Stop. That workflow is planned for a future revision. Offer instead: edit pages directly, or delete the directory and restart fresh. |
+| Git unavailable when resolving retro `version:` | Write `version: unknown` and continue. Never fail the retro over SHA resolution. |
+| User waves off retro entirely | Push once ("even one observation is useful"), then accept whatever they give and mark the rest `(skipped)`. Do not silently skip the file write. |
 
 ## What this skill is not
 
