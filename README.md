@@ -30,14 +30,13 @@ Follow the install section of the [memex README](https://github.com/eyefodder/me
 
 ```bash
 git clone https://github.com/eyefodder/big_questions ~/Development/big_questions
-
-ln -s ~/Development/big_questions/skills/inquiry-elicit \
-      ~/Development/big_questions/skills/inquiry-gap \
-      ~/Development/big_questions/skills/inquiry-init \
-      ~/.claude/skills/
+mkdir -p ~/.claude/skills
+ln -s ~/Development/big_questions/skills/inquiry-elicit ~/.claude/skills/
+ln -s ~/Development/big_questions/skills/inquiry-gap    ~/.claude/skills/
+ln -s ~/Development/big_questions/skills/inquiry-init   ~/.claude/skills/
 ```
 
-Three symlinks, one command. `/inquiry-init`, `/inquiry-elicit`, and `/inquiry-gap` are now available in any Claude Code session.
+Then **restart Claude Code** so it picks up the new skills. `/inquiry-init`, `/inquiry-elicit`, and `/inquiry-gap` are now available in any Claude Code session.
 
 **Why user-scoped.** Keeping install locations consistent with memex removes a chicken-and-egg problem: `/inquiry-init` needs to be invocable *before* an inquiry instance exists, which rules out project-scoped installation. The minor cost — `/inquiry-elicit` and `/inquiry-gap` appear in autocomplete in non-inquiry sessions — matches how Claude Code's built-in skills work and is acceptable at v0.1.
 
