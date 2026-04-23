@@ -1,6 +1,6 @@
 # big_questions
 
-**big_questions** is an inquiry-instrument layer on top of the [memex](https://github.com/<user>/memex) LLM-wiki harness. It adds two Claude Code skills — `/inquiry-elicit` to conduct a structured interview and produce your ~12 big questions, and `/inquiry-gap` to run gap analysis against them. You keep a small, explicit set of questions; the system watches what you're missing.
+**big_questions** is an inquiry-instrument layer on top of the [memex](https://github.com/eyefodder/memex) LLM-wiki harness. It adds two Claude Code skills — `/inquiry-elicit` to conduct a structured interview and produce your ~12 big questions, and `/inquiry-gap` to run gap analysis against them. You keep a small, explicit set of questions; the system watches what you're missing.
 
 The intellectual lineage is Feynman's "twelve favorite problems," documented by Gian-Carlo Rota (see [Intellectual lineage](#intellectual-lineage) below). memex supplies the generic wiki harness; big_questions specializes it for the inquiry domain.
 
@@ -16,7 +16,7 @@ The intellectual lineage is Feynman's "twelve favorite problems," documented by 
 
 ## Requires
 
-[memex](https://github.com/<user>/memex) — the generic LLM-wiki harness. big_questions will not function without it: ingestion, querying, linting, `log.md` formatting, and `index.md` maintenance all come from memex. The inquiry skills here call memex's helper scripts (`helpers/log_append.py`, `helpers/index_update.py`) directly.
+[memex](https://github.com/eyefodder/memex) — the generic LLM-wiki harness. big_questions will not function without it: ingestion, querying, linting, `log.md` formatting, and `index.md` maintenance all come from memex. The inquiry skills here call memex's helper scripts (`helpers/log_append.py`, `helpers/index_update.py`) directly.
 
 ## Install
 
@@ -24,12 +24,12 @@ Two-part install: memex first, then big_questions. Both install user-scoped — 
 
 ### 1. Install memex
 
-Follow the install section of the [memex README](https://github.com/<user>/memex#install). That sets up `~/Development/memex/` and symlinks the `wiki-*` harness skills into `~/.claude/skills/`.
+Follow the install section of the [memex README](https://github.com/eyefodder/memex#install). That sets up `~/Development/memex/` and symlinks the `wiki-*` harness skills into `~/.claude/skills/`.
 
 ### 2. Clone big_questions and symlink the inquiry skills user-scoped
 
 ```bash
-git clone https://github.com/<user>/big_questions ~/Development/big_questions
+git clone https://github.com/eyefodder/big_questions ~/Development/big_questions
 
 ln -s ~/Development/big_questions/skills/inquiry-elicit \
       ~/Development/big_questions/skills/inquiry-gap \

@@ -47,7 +47,7 @@ def precondition_check(memex_path: Path) -> Path | None:
     init_wiki = memex_path / "helpers" / "init_wiki.py"
     if not init_wiki.is_file() or not os.access(init_wiki, os.X_OK):
         eprint(f"memex harness not found at {memex_path}")
-        print("Install memex first: https://github.com/<user>/memex",
+        print("Install memex first: https://github.com/eyefodder/memex",
               file=sys.stderr)
         print("Or pass --memex-path pointing at your install location.",
               file=sys.stderr)
