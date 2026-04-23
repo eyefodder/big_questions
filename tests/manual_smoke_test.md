@@ -126,7 +126,7 @@ rm -rf /tmp/paul_elicit_smoke
 
 ## Known quirks
 
-- **Citations pointing to `../../raw/*.md` files that don't exist are flagged as `(outside wiki)` errors by `wiki-lint`** (exit 1). The lint helper counts anything resolving outside `<wiki>/` as an error, not a warning — this is stricter than MX-010's runbook implied. File as MX-015 if not yet tracked. For this runbook, don't worry: lint is not invoked by the inquiry skills, so Tests 1–4 are unaffected.
+- **Citations pointing outside the wiki root (e.g. `../../raw/*.md` provenance links) are `wiki-lint` warnings, not errors** — they appear under the "Outside-wiki citations (warnings)" section and do not affect exit code. Lint is not invoked by the inquiry skills, so Tests 1–4 are unaffected either way.
 - **`inquiry-elicit` won't re-run over a non-empty `wiki/questions/`** (v0.1 constraint — re-elicitation is planned for a future revision). If you need to retest, `rm -rf` the instance and re-run Setup.
 - **`inquiry-gap` set mode refuses <3 active questions**; within mode refuses <3 contributions. Both are intentional guards — see the SKILL's `## Failure modes`.
 - **The "non-obvious" self-critique loop** in `inquiry-gap` can bounce twice and then write nothing. If that happens, the in-session summary tells you honestly — it's not a bug.
