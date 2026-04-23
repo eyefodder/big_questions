@@ -6,6 +6,24 @@ Run in a **fresh Claude Code session** `cd`'d into the throwaway instance. Stop 
 
 ## Quick setup
 
+In a Claude Code session with the `inquiry-init` skill available (either user-scoped at `~/.claude/skills/inquiry-init/` or running from any directory where the skill is discoverable):
+
+```
+/inquiry-init /tmp/paul_elicit_smoke
+```
+
+Then in a terminal:
+
+```bash
+cd /tmp/paul_elicit_smoke && claude
+```
+
+Running `/inquiry-init` twice is safe (idempotent) — the helper detects an already-initialized instance and short-circuits cleanly without touching existing content. To reseed `SCHEMA.md` after a template update, re-run with `--force`.
+
+### Manual setup (if `/inquiry-init` isn't available yet)
+
+Use this for debugging or if you're on a machine that doesn't have the `inquiry-init` skill wired up:
+
 ```bash
 # 1. Stage a throwaway instance.
 rm -rf /tmp/paul_elicit_smoke
