@@ -66,7 +66,7 @@ If you'd rather not use the helper, the equivalent is four shell commands:
 
 ```bash
 mkdir -p <instance-path>/{wiki/questions,raw,meta,.claude/skills}
-touch <instance-path>/wiki/index.md <instance-path>/wiki/log.md
+touch <instance-path>/wiki/index.md <instance-path>/meta/log.md
 cat ~/Development/memex/schema.example.md \
     ~/Development/big_questions/schema.inquiry.example.md \
     > <instance-path>/SCHEMA.md
@@ -134,7 +134,7 @@ The two template files are a starting point, not a live dependency. Once `SCHEMA
 
 ## Status / versioning
 
-**v0.1 — Skateboard tier.** Question elicitation, set-level gap, within-question gap. Revision and retirement workflow, automated ingestion, and semi-automated write-ups are future work.
+**v0.1.** Question elicitation, set-level gap, within-question gap. Revision and retirement workflow, automated ingestion, and semi-automated write-ups are planned for future revisions.
 
 ## License
 
