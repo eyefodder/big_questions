@@ -1,3 +1,137 @@
 # big_questions
 
-big_questions — inquiry-instrument skills on top of the memex harness. Elicit your ~12 big questions and run gap analysis on them over time. Full README coming in BQ-005.
+**big_questions** is an inquiry-instrument layer on top of the [memex](https://github.com/<user>/memex) LLM-wiki harness. It adds two Claude Code skills — `/inquiry-elicit` to conduct a structured interview and produce your ~12 big questions, and `/inquiry-gap` to run gap analysis against them. You keep a small, explicit set of questions; the system watches what you're missing.
+
+The intellectual lineage is Feynman's "twelve favorite problems," documented by Gian-Carlo Rota (see [Intellectual lineage](#intellectual-lineage) below). memex supplies the generic wiki harness; big_questions specializes it for the inquiry domain.
+
+## What's in the box
+
+| Artifact | Purpose |
+|---|---|
+| `skills/inquiry-elicit/` | Claude Code skill — runs a 15–20 minute structured interview and writes 8–12 question pages under `wiki/questions/`. |
+| `skills/inquiry-gap/` | Claude Code skill — produces gap reports at two scopes: **set-level** (across all active questions) and **within-question** (on any page with ≥3 contributions). |
+| `schema.inquiry.example.md` | Inquiry-specific schema addendum. Appends onto `memex/schema.example.md` to define question pages, contribution notes, gap reports, and elicitation conventions. |
+
+## Requires
+
+[memex](https://github.com/<user>/memex) — the generic LLM-wiki harness. big_questions will not function without it: ingestion, querying, linting, `log.md` formatting, and `index.md` maintenance all come from memex. The inquiry skills here call memex's helper scripts (`helpers/log_append.py`, `helpers/index_update.py`) directly.
+
+## Install
+
+Two-part install: memex first, then big_questions.
+
+### 1. Install memex
+
+Follow the install section of the [memex README](https://github.com/<user>/memex#install). That sets up `~/Development/memex/` and symlinks the `wiki-*` harness skills into `~/.claude/skills/` (user-scoped — reusable across any wiki-shaped project).
+
+### 2. Clone big_questions and symlink the inquiry skills into your instance
+
+```bash
+git clone https://github.com/<user>/big_questions ~/Development/big_questions
+
+# For an instance at <instance-path>:
+ln -s ~/Development/big_questions/skills/inquiry-elicit \
+      ~/Development/big_questions/skills/inquiry-gap \
+      <instance-path>/.claude/skills/
+```
+
+**Why project-scoped, not user-scoped.** The inquiry skills carry domain assumptions (question pages, gap reports, elicitation workflow) that only make sense for an inquiry-instrument project. Installing them user-wide would pollute every other Claude Code project with slash commands that don't apply. memex's harness skills are domain-neutral and go user-scoped; big_questions' inquiry skills travel with the instance.
+
+## Bootstrap a new inquiry instance
+
+An **instance** is the folder holding your actual question wiki — the questions, the paste-ins, the gap reports. It is independent of this repo so skill development stays decoupled from question content.
+
+1. **Create the instance directory.** Any location works. For a vault-based instance (e.g. inside an Obsidian vault), a folder inside the vault is fine:
+
+    ```bash
+    mkdir -p <instance-path>
+    cd <instance-path>
+    ```
+
+2. **Compose `SCHEMA.md`** by concatenating the memex base template and the inquiry addendum:
+
+    ```bash
+    cat ~/Development/memex/schema.example.md \
+        ~/Development/big_questions/schema.inquiry.example.md \
+        > <instance-path>/SCHEMA.md
+    # Edit to customize voice, status vocabulary, instance-specific preferences.
+    ```
+
+3. **Create the directory structure** the skills expect:
+
+    ```bash
+    mkdir -p <instance-path>/wiki/questions \
+             <instance-path>/raw \
+             <instance-path>/meta \
+             <instance-path>/.claude/skills
+    ```
+
+4. **Symlink skills** — memex's harness skills user-scoped (one-time, from the memex install above) and big_questions' inquiry skills project-scoped (per the [Install](#install) step above).
+
+Your instance is now ready for `/inquiry-elicit`.
+
+## Quickstart
+
+The core loop in four steps:
+
+1. **Elicit your question set.** In Claude Code, from your instance directory:
+
+    ```
+    /inquiry-elicit
+    ```
+
+    A 15–20 minute interview that probes your current role, concerns, 12-month expertise goals, positions you'd want to argue, and re-read material. Produces 8–12 question pages under `wiki/questions/`, each with frontmatter and a framing section. No padding — if fewer than 8 honest questions surface, the skill says so and recommends a second pass.
+
+2. **Ingest sources.** Paste a URL or a chunk of text into Claude Code and run:
+
+    ```
+    /wiki-ingest
+    ```
+
+    (from memex). The harness classifies the source against your question pages and appends a one-sentence contribution note to each one it advances.
+
+3. **Run a within-question gap report** on any page that has accumulated ≥3 contributions:
+
+    ```
+    /inquiry-gap within <slug>
+    ```
+
+    Surfaces thin evidence, one-sided arguments, missing counter-positions, repeated sources.
+
+4. **Run a set-level gap report** any time:
+
+    ```
+    /inquiry-gap
+    ```
+
+    Surfaces implicit frames, missing dimensions, overlapping pairs, questions too narrow or too broad to be productive. Writes `meta/gap_report_<YYYY-MM-DD>.md` and renders a scannable summary in the conversation.
+
+Gap reports are required to produce at least one non-obvious observation per run. A generic report is worse than no report — it teaches you the instrument doesn't see anything you don't.
+
+## Intellectual lineage
+
+This project externalizes a practice attributed to Richard Feynman and documented by Gian-Carlo Rota in *["Ten Lessons I Wish I Had Been Taught"](https://www.ams.org/notices/199701/comm-rota.pdf)* (Notices of the AMS, 1997):
+
+> *"You have to keep a dozen of your favorite problems constantly present in your mind, although by and large they will lay in a dormant state. Every time you hear or read a new trick or a new result, test it against each of your twelve problems to see whether it helps."*
+
+Feynman's twelve problems lived in his head. big_questions is what that practice looks like when the bookkeeping is handed to an LLM — the questions, the framing, the contributions, the cross-references, and the gap analysis all live on disk and are maintained by the model. The user keeps their attention small and explicit; the model keeps the records.
+
+See PRD Section 2.1 of the parent project for more on the framing.
+
+## Schema composition model
+
+The schema behind an inquiry instance is composed of three layers (memex Decision 8):
+
+1. **Generic wiki conventions** — baked into the memex harness skills and shipped as `memex/schema.example.md`. Directory structure, `log.md` and `index.md` formats, ingest/query/lint workflow.
+2. **Inquiry-specific additions** — shipped here as `schema.inquiry.example.md`. Question page format, contribution notes, gap report conventions, elicitation workflow, inquiry-domain vocabulary.
+3. **Instance customizations** — live in your instance's `SCHEMA.md` after the two templates are composed at bootstrap. Voice, status vocabulary, thematic tags, anything project-specific.
+
+The two template files are a starting point, not a live dependency. Once `SCHEMA.md` is composed, you edit it directly. No ongoing merge burden.
+
+## Status / versioning
+
+**v0.1 — Skateboard tier.** Question elicitation, set-level gap, within-question gap. Revision and retirement workflow, automated ingestion, and semi-automated write-ups are future work.
+
+## License
+
+MIT.
