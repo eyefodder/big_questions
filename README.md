@@ -122,6 +122,12 @@ Feynman's twelve problems lived in his head. big_questions is what that practice
 
 See PRD Section 2.1 of the parent project for more on the framing.
 
+## Feedback
+
+Every `/inquiry-elicit` and `/inquiry-gap` session ends with a short conversational retro — five questions on how it went, where the skill pushed well, where it let you off easy, and one specific change that would make it better. Your answers are written to `meta/feedback_<skill>_<date>.md` inside your instance.
+
+The file is yours by default — it stays local in your instance and is never uploaded anywhere automatically. If you want to share what you found back to help sharpen the skill, file an issue using the [Skill feedback template](https://github.com/eyefodder/big_questions/issues/new?template=skill_feedback.yml) and paste the contents of your retro file in. The template fields line up with the file sections, so it's copy-paste. Sharing is opt-in, per session, per file.
+
 ## Schema composition model
 
 The schema behind an inquiry instance is composed of three layers (memex Decision 8):
