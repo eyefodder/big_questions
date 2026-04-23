@@ -1,0 +1,78 @@
+name: Skill feedback
+description: Share feedback on a big_questions skill session. Paste from your meta/feedback_<skill>_<date>.md file if you have one — the fields line up.
+title: "[feedback] "
+labels:
+  - feedback
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for sharing feedback on a big_questions skill session. If you ran `/inquiry-elicit` or `/inquiry-gap`, you likely have a file at `meta/feedback_<skill>_<date>.md` in your instance — paste its contents into the matching fields below. Everything except the skill name is optional in practice; fill what's useful.
+  - type: dropdown
+    id: skill
+    attributes:
+      label: Skill
+      description: Which skill is this feedback about?
+      options:
+        - inquiry-elicit
+        - inquiry-gap
+        - inquiry-init
+        - wiki-ingest
+        - wiki-query
+        - wiki-lint
+        - wiki-init
+        - other
+    validations:
+      required: true
+  - type: input
+    id: session_date
+    attributes:
+      label: Session date
+      description: Date of the session (YYYY-MM-DD). Optional.
+      placeholder: "2026-04-22"
+    validations:
+      required: false
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: Commit SHA or version string from your feedback file's frontmatter. Optional.
+      placeholder: "a1b2c3d or unknown"
+    validations:
+      required: false
+  - type: textarea
+    id: how_did_it_go
+    attributes:
+      label: How did this go?
+      description: One or two sentences on the overall session experience.
+      placeholder: "Shape of what went well, what didn't."
+    validations:
+      required: true
+  - type: textarea
+    id: pushed_effectively
+    attributes:
+      label: Did the skill push you effectively?
+      description: Where did it work — a concrete moment, an observation that landed, a question that sharpened something.
+    validations:
+      required: true
+  - type: textarea
+    id: let_you_off_easy
+    attributes:
+      label: Where did it let you off easy?
+      description: Where the skill should have pushed harder, surfaced something it didn't, or accepted an answer it shouldn't have.
+    validations:
+      required: true
+  - type: textarea
+    id: generic_or_landed
+    attributes:
+      label: Observations that felt generic or landed well
+      description: For gap reports especially — which observations felt non-obvious, and which felt like restating the obvious. Leave blank if not applicable.
+    validations:
+      required: false
+  - type: textarea
+    id: one_change
+    attributes:
+      label: One specific change that would make this better
+      description: If you could change one thing about the skill, what would it be?
+    validations:
+      required: true
