@@ -1,4 +1,4 @@
-"""Unit tests for helpers/init_inquiry.py (BQ-010).
+"""Unit tests for helpers/init_inquiry.py (BQ-010, revised BQ-011).
 
 Stdlib-only. Subprocess-based: the helper is a CLI bootstrap and the subprocess
 contract is what callers actually use. Each test gets its own TemporaryDirectory.
@@ -6,6 +6,11 @@ contract is what callers actually use. Each test gets its own TemporaryDirectory
 Integration-style: tests assume memex is installed at ``~/Development/memex``.
 Tests that need it call ``_require_memex()`` in setUp, which ``skipTest``s with
 a clear message if the harness is missing.
+
+BQ-011: inquiry skills are now installed user-scoped at ``~/.claude/skills/``
+(same as memex). ``init_inquiry.py`` no longer symlinks anything into
+``<target>/.claude/skills/`` — that directory is created empty by init_wiki
+and stays empty. Tests verify that invariant.
 
 Run from repo root: ``python3 -m unittest discover tests/``
 """
@@ -23,10 +28,9 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parent.parent
 SCRIPT_PATH = REPO_ROOT / "helpers" / "init_inquiry.py"
 ADDENDUM_PATH = REPO_ROOT / "schema.inquiry.example.md"
-SKILLS_ROOT = REPO_ROOT / "skills"
 
 # Idempotency marker — matches ADDENDUM_MARKER in init_inquiry.py. Note the
-# em-dash (U+2014), not a hyphen. (BQ-008's report said en-dash; source uses em-dash.)
+# em-dash (U+2014), not a hyphen.
 ADDENDUM_MARKER = "<!-- Inquiry domain addendum — appends to memex/schema.example.md -->"
 
 # Default memex location (the helper's own default expands to this).
@@ -57,6 +61,18 @@ def _require_memex(test_case):
             f"(expected helpers/init_wiki.py); "
             f"integration tests need a real memex install."
         )
+
+
+def _skills_dir_contents(target: Path) -> list[str]:
+    """Return non-hidden entries in <target>/.claude/skills/ (excluding .gitkeep).
+
+    The directory is created by init_wiki and seeded with a .gitkeep file;
+    init_inquiry must not add anything else to it.
+    """
+    skills_dir = target / ".claude" / "skills"
+    if not skills_dir.is_dir():
+        return []
+    return [p.name for p in skills_dir.iterdir() if p.name != ".gitkeep"]
 
 
 class InitInquiryHappyPathTests(unittest.TestCase):
@@ -114,25 +130,25 @@ class InitInquiryHappyPathTests(unittest.TestCase):
                 "wiki/pages/ should not exist when pages-dir=questions",
             )
 
-    def test_fresh_target_symlinks_resolve_correctly(self):
-        """Both inquiry skills are symlinked into .claude/skills/ and resolve to repo sources."""
+    def test_fresh_target_skills_dir_exists_and_is_empty(self):
+        """BQ-011: <target>/.claude/skills/ is created by init_wiki but left empty
+        by init_inquiry — inquiry skills are installed user-scoped, not project-scoped."""
         with tempfile.TemporaryDirectory() as td:
             target = Path(td) / "inquiry_instance"
             result = _run_init_inquiry(target)
             self.assertEqual(result.returncode, 0, msg=f"stderr: {result.stderr}")
 
-            for skill in ("inquiry-elicit", "inquiry-gap"):
-                link = target / ".claude" / "skills" / skill
-                self.assertTrue(
-                    link.is_symlink(),
-                    f".claude/skills/{skill} is not a symlink",
-                )
-                expected = (SKILLS_ROOT / skill).resolve()
-                self.assertEqual(
-                    link.resolve(),
-                    expected,
-                    f"{skill} symlink does not resolve to {expected}",
-                )
+            skills_dir = target / ".claude" / "skills"
+            self.assertTrue(
+                skills_dir.is_dir(),
+                ".claude/skills/ should exist (created by init_wiki's baseline skeleton)",
+            )
+            contents = _skills_dir_contents(target)
+            self.assertEqual(
+                contents,
+                [],
+                f".claude/skills/ should contain no entries (init_inquiry adds nothing); got: {contents}",
+            )
 
 
 class InitInquiryIdempotencyTests(unittest.TestCase):
@@ -143,7 +159,7 @@ class InitInquiryIdempotencyTests(unittest.TestCase):
 
     def test_plain_rerun_is_safe(self):
         """Second run (no --force) exits 0, signals short-circuit, keeps marker count at 1,
-        and leaves skill symlinks intact."""
+        and leaves .claude/skills/ empty."""
         with tempfile.TemporaryDirectory() as td:
             target = Path(td) / "inquiry_instance"
             first = _run_init_inquiry(target)
@@ -169,14 +185,12 @@ class InitInquiryIdempotencyTests(unittest.TestCase):
                 "addendum marker count should stay at 1 after plain re-run",
             )
 
-            # Symlinks preserved.
-            for skill in ("inquiry-elicit", "inquiry-gap"):
-                link = target / ".claude" / "skills" / skill
-                self.assertTrue(link.is_symlink(), f"{skill} symlink missing")
-                self.assertEqual(
-                    link.resolve(), (SKILLS_ROOT / skill).resolve(),
-                    f"{skill} symlink no longer resolves to repo source",
-                )
+            # Skills dir remains empty after re-run.
+            self.assertEqual(
+                _skills_dir_contents(target),
+                [],
+                ".claude/skills/ should stay empty across re-runs",
+            )
 
 
 class InitInquiryForceReseedTests(unittest.TestCase):
@@ -215,24 +229,6 @@ class InitInquiryForceReseedTests(unittest.TestCase):
                 content.count(ADDENDUM_MARKER), 1,
                 "after --force: marker count must be exactly 1, not 2",
             )
-
-    def test_force_reseed_symlinks_still_correct(self):
-        """--force re-run preserves the skill symlinks."""
-        with tempfile.TemporaryDirectory() as td:
-            target = Path(td) / "inquiry_instance"
-            first = _run_init_inquiry(target)
-            self.assertEqual(first.returncode, 0, msg=f"stderr: {first.stderr}")
-
-            second = _run_init_inquiry(target, force=True)
-            self.assertEqual(second.returncode, 0, msg=f"stderr: {second.stderr}")
-
-            for skill in ("inquiry-elicit", "inquiry-gap"):
-                link = target / ".claude" / "skills" / skill
-                self.assertTrue(link.is_symlink(), f"{skill} symlink missing after --force")
-                self.assertEqual(
-                    link.resolve(), (SKILLS_ROOT / skill).resolve(),
-                    f"{skill} symlink no longer resolves to repo source",
-                )
 
 
 class InitInquiryUserContentPreservationTests(unittest.TestCase):
@@ -274,16 +270,6 @@ class InitInquiryUserContentPreservationTests(unittest.TestCase):
                 "user-authored raw/sample.md was clobbered by --force",
             )
 
-            # Symlinks still correct too.
-            for skill in ("inquiry-elicit", "inquiry-gap"):
-                link = target / ".claude" / "skills" / skill
-                self.assertTrue(link.is_symlink(), f"{skill} symlink missing")
-                self.assertEqual(
-                    link.resolve(),
-                    (SKILLS_ROOT / skill).resolve(),
-                    f"{skill} symlink no longer resolves to repo source",
-                )
-
 
 class InitInquiryPreconditionFailureTests(unittest.TestCase):
     """Precondition failures: memex harness missing at --memex-path."""
@@ -312,67 +298,6 @@ class InitInquiryPreconditionFailureTests(unittest.TestCase):
             self.assertFalse(
                 target.exists(),
                 "target directory was created despite precondition failure (no half-init state allowed)",
-            )
-
-
-class InitInquirySymlinkConflictTests(unittest.TestCase):
-    """Pre-existing symlink pointing elsewhere must cause exit 1, not silent overwrite."""
-
-    def setUp(self):
-        _require_memex(self)
-
-    def test_conflicting_symlink_exits_one(self):
-        """A symlink at .claude/skills/inquiry-elicit pointing at /tmp triggers exit 1."""
-        with tempfile.TemporaryDirectory() as td:
-            target = Path(td) / "inquiry_instance"
-            first = _run_init_inquiry(target)
-            self.assertEqual(first.returncode, 0, msg=f"stderr: {first.stderr}")
-
-            # Replace the correct symlink with one pointing elsewhere.
-            link = target / ".claude" / "skills" / "inquiry-elicit"
-            self.assertTrue(link.is_symlink(), "precondition: original symlink should exist")
-            link.unlink()
-            # Point at /tmp — a real dir that's clearly not the expected target.
-            os.symlink("/tmp", link)
-            self.assertTrue(link.is_symlink())
-            self.assertEqual(link.resolve(), Path("/tmp").resolve())
-
-            result = _run_init_inquiry(target)
-
-            self.assertEqual(
-                result.returncode,
-                1,
-                msg=f"expected exit 1 on conflict; got {result.returncode}; stderr: {result.stderr}",
-            )
-            self.assertIn(
-                "conflicting",
-                result.stderr,
-                f"expected 'conflicting' substring in stderr; got: {result.stderr!r}",
-            )
-
-    def test_conflicting_symlink_shows_partial_state_summary(self):
-        """Stderr should surface the partial-state report (init_wiki ok, addendum ok, skill FAILED)."""
-        with tempfile.TemporaryDirectory() as td:
-            target = Path(td) / "inquiry_instance"
-            first = _run_init_inquiry(target)
-            self.assertEqual(first.returncode, 0, msg=f"stderr: {first.stderr}")
-
-            link = target / ".claude" / "skills" / "inquiry-elicit"
-            link.unlink()
-            os.symlink("/tmp", link)
-
-            result = _run_init_inquiry(target)
-            self.assertEqual(result.returncode, 1, msg=f"stderr: {result.stderr}")
-
-            self.assertIn(
-                "Partial init summary",
-                result.stderr,
-                f"expected partial-state summary in stderr; got: {result.stderr!r}",
-            )
-            self.assertIn(
-                "FAILED",
-                result.stderr,
-                f"expected 'FAILED' marker for the broken skill step; got: {result.stderr!r}",
             )
 
 
