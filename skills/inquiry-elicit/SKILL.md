@@ -7,9 +7,9 @@ description: Conduct a 15-20 minute structured interview to elicit and articulat
 
 ## Purpose
 
-This skill is the entry point for a new inquiry-instrument instance. It runs a structured conversation with the user, probes for the handful of questions they are genuinely trying to figure out right now, and writes those questions to disk as wiki pages conforming to the inquiry page schema. It produces 8-12 question files under `./wiki/questions/`, rebuilds `./wiki/index.md`, and appends an entry to `./wiki/log.md`.
+This skill is the entry point for a new inquiry-instrument instance. It runs a structured conversation with the user, probes for the handful of questions they are genuinely trying to figure out right now, and writes those questions to disk as wiki pages conforming to the inquiry page schema. It produces 8-12 question files under `./wiki/questions/`, rebuilds `./wiki/index.md`, and appends an entry to `./meta/log.md`.
 
-Invoke when: the instance has a composed `SCHEMA.md` at its root but `./wiki/questions/` is empty (or the user explicitly wants to bootstrap a fresh question set). At Skateboard, re-running against an existing set is not supported — that is Bicycle scope.
+Invoke when: the instance has a composed `SCHEMA.md` at its root but `./wiki/questions/` is empty (or the user explicitly wants to bootstrap a fresh question set). In v0.1, re-running against an existing set is not supported — that is planned for a future revision.
 
 ## Intellectual lineage
 
@@ -25,7 +25,7 @@ Before starting the interview, verify:
    1. Check `./memex/helpers/` (some instances vendor the harness).
    2. Follow this SKILL.md's symlink back to its source directory and look for a sibling `../Development/memex/helpers/` (the canonical install path per Decision 9).
    3. If neither resolves, ask the user for the path before proceeding. Do not silently skip the helper calls.
-4. If `./wiki/questions/` already contains `*.md` files, stop and ask. Re-elicitation is not a Skateboard workflow; the user may have intended a second-pass append, which is out of scope here.
+4. If `./wiki/questions/` already contains `*.md` files, stop and ask. Re-elicitation is not a v0.1 workflow; the user may have intended a second-pass append, which is out of scope here.
 
 If SCHEMA.md is missing, error out with: "No SCHEMA.md at `<cwd>`. Bootstrap the instance first by composing `memex/schema.example.md + big_questions/schema.inquiry.example.md > SCHEMA.md`."
 
@@ -136,11 +136,11 @@ Check the exit code. If it fails, read stderr and surface the error — the inde
 
 ## Logging
 
-Append a single entry to `./wiki/log.md`:
+Append a single entry to `./meta/log.md`:
 
 ```bash
 python3 <harness-path>/helpers/log_append.py \
-  --wiki ./wiki \
+  --log-dir ./meta \
   --op elicit \
   --subject "initial <n>-question set" \
   --body "Produced <n> questions across <brief theme summary>.<optional shortfall note>"
@@ -161,7 +161,7 @@ Where:
 | Helpers unreachable | Ask the user for the path. If they still can't provide one, write the pages, skip the index and log calls, and print exact commands the user can run manually afterwards. |
 | Duplicate slug | Append a numeric disambiguator (`-2`, `-3`, ...). Do not silently overwrite. |
 | Fewer than 8 specific questions | Write what survived the quality bar. Log the shortfall. Recommend a second session. Do not pad. |
-| User wants to re-elicit over an existing set | Stop. This is Bicycle scope. Offer instead: edit pages directly, or delete the directory and restart fresh. |
+| User wants to re-elicit over an existing set | Stop. That workflow is planned for a future revision. Offer instead: edit pages directly, or delete the directory and restart fresh. |
 
 ## What this skill is not
 

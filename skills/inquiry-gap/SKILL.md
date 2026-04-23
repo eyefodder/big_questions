@@ -191,11 +191,11 @@ Design notes for the render:
 
 ### 8. Append to `log.md`
 
-Invoke the log helper via the bash tool. `log.md` lives inside `wiki/` per the baseline layout — pass `--wiki ./wiki`:
+Invoke the log helper via the bash tool. `log.md` lives inside `meta/` per the baseline layout — pass `--log-dir ./meta`:
 
 ```bash
 python3 <path-to-memex>/helpers/log_append.py \
-    --wiki ./wiki \
+    --log-dir ./meta \
     --op gap-report \
     --subject "<mode>: <n> observations" \
     --body "<one-line paraphrase of the headline observation>. See meta/gap_report_<YYYY-MM-DD>.md."
@@ -211,7 +211,7 @@ See **Helper invocation** below for resolving `<path-to-memex>`.
 
 ## Helper invocation
 
-This skill shells out to one helper script via the bash tool: `memex/helpers/log_append.py`. No inquiry-specific helpers exist at Skateboard.
+This skill shells out to one helper script via the bash tool: `memex/helpers/log_append.py`. No inquiry-specific helpers exist in v0.1.
 
 **Always invoke with `python3` explicitly** (per architecture Decision 6 — avoid ambiguous `python` on macOS).
 
