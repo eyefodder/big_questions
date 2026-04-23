@@ -129,7 +129,7 @@ The `title` frontmatter field holds the question verbatim (per the schema's deci
 After all pages are written, rebuild the index:
 
 ```bash
-python3 <harness-path>/helpers/index_update.py --wiki ./wiki --pages-dir questions
+python3 <harness-path>/helpers/index_update.py --content-dir ./wiki --pages-dir questions
 ```
 
 Check the exit code. If it fails, read stderr and surface the error — the index is how the ingest and gap skills find the pages.
