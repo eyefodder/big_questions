@@ -209,6 +209,74 @@ Examples:
 
 See **Helper invocation** below for resolving `<path-to-memex>`.
 
+### 9. End-of-session retro
+
+After the log append succeeds, run a short wrap-up retro with the user before signing off. The tone is conversational — "one more thing before we finish" — not a form or a survey. Ask the questions one at a time and wait for each answer before moving to the next. Do not batch them.
+
+Ask, in order, phrased naturally in your own words. Approximate phrasings:
+
+1. "One more thing before we finish — how did this go?"
+2. "Was the 'non-obvious observation' actually non-obvious to you? Quote the one that landed, or tell me why none did."
+3. "Which observations felt generic or obvious? (These should be cut from future runs.)"
+4. "What did the report miss that you noticed yourself?"
+5. "One specific change to improve the report?"
+
+Run the retro even if the user seemed satisfied and ready to leave — the generic/obvious question is the one most likely to sharpen the next run. If the user tries to wave it off with "no feedback," push once gently: "Even one observation is useful." If they're still rushed, accept whatever they give and mark unanswered prompts as `(skipped)` in the file — do not accept a fully empty retro silently.
+
+#### Writing the feedback file
+
+After the final answer, write to `meta/feedback_gap_<YYYY-MM-DD>.md`. If a file already exists at that path (same-day retry), append a numeric suffix: `_2`, `_3`, ... — never clobber a prior session's feedback.
+
+**Resolving the `version:` field.** Try to capture the big_questions commit SHA so feedback is tied to the skill revision that produced the report:
+
+1. Resolve this SKILL.md's real path (follow the symlink from `~/.claude/skills/inquiry-gap/` back to the repo).
+2. From that path, find the repo root (the enclosing `big_questions/` directory).
+3. Run `git -C <repo> rev-parse --short HEAD` via the bash tool.
+4. If git is unavailable, the path doesn't resolve, or the command fails, set `version: unknown`. Never fail the retro over this.
+
+The `mode:` frontmatter field records which gap mode produced the report: `set` for set-level runs, or `within-<slug>` for within-question runs (e.g. `within-self-improving-software`).
+
+File content (fill answers verbatim as the user gave them; preserve their words):
+
+```markdown
+---
+skill: inquiry-gap
+date: YYYY-MM-DD
+mode: set | within-<slug>
+version: <sha-or-unknown>
+---
+
+# Session feedback — inquiry-gap — YYYY-MM-DD
+
+## How did this go?
+
+<answer>
+
+## Was the non-obvious observation actually non-obvious?
+
+<answer>
+
+## Observations that felt generic or obvious
+
+<answer>
+
+## What the report missed
+
+<answer>
+
+## One specific change to improve the report
+
+<answer>
+```
+
+#### Final message to the user
+
+After the file is written, tell the user where it is and offer the issue-template URL. Something like:
+
+> Saved your feedback to `meta/feedback_gap_<YYYY-MM-DD>.md`. If you'd like to share it back to help improve the skill, file an issue using this template: https://github.com/eyefodder/big_questions/issues/new?template=skill_feedback.yml — no pressure, it's your file.
+
+Keep the tone warm and low-friction. The file is the user's by default; sharing is opt-in.
+
 ## Helper invocation
 
 This skill shells out to one helper script via the bash tool: `memex/helpers/log_append.py`. No inquiry-specific helpers exist in v0.1.
@@ -249,3 +317,7 @@ The non-obvious requirement is enforced mechanically in Step 4 by:
 - **`meta/` directory missing.** Create it (`mkdir -p meta`) and continue. Note the creation in the in-session summary so the user knows where reports are now living.
 
 - **A `gap_report_<YYYY-MM-DD>.md` for today already exists.** Write to `gap_report_<YYYY-MM-DD>_b.md` (then `_c`, etc.). Update the `gap_report_latest.md` symlink to point to the newest. Tell the user a prior run existed and give the filename so they can compare.
+
+- **Git unavailable when resolving retro `version:`.** Write `version: unknown` into the feedback frontmatter and continue. Never fail the retro over SHA resolution.
+
+- **User waves off the retro entirely.** Push once ("even one observation is useful"), then accept whatever they give and mark the rest `(skipped)`. Do not silently skip the file write.
