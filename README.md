@@ -10,6 +10,8 @@ The intellectual lineage is Feynman's "twelve favorite problems," documented by 
 |---|---|
 | `skills/inquiry-elicit/` | Claude Code skill — runs a 15–20 minute structured interview and writes 8–12 question pages under `wiki/questions/`. |
 | `skills/inquiry-gap/` | Claude Code skill — produces gap reports at two scopes: **set-level** (across all active questions) and **within-question** (on any page with ≥3 contributions). |
+| `skills/inquiry-init/` | Claude Code skill — one-command bootstrap for a new inquiry instance: creates the directory tree and composes `SCHEMA.md` from the memex base plus the inquiry addendum. |
+| `helpers/init_inquiry.py` | Python CLI invoked by `/inquiry-init`; shells out to memex's `init_wiki.py` and layers the inquiry addendum onto `SCHEMA.md`. |
 | `schema.inquiry.example.md` | Inquiry-specific schema addendum. Appends onto `memex/schema.example.md` to define question pages, contribution notes, gap reports, and elicitation conventions. |
 
 ## Requires
@@ -18,57 +20,60 @@ The intellectual lineage is Feynman's "twelve favorite problems," documented by 
 
 ## Install
 
-Two-part install: memex first, then big_questions.
+Two-part install: memex first, then big_questions. Both install user-scoped — the skills live in `~/.claude/skills/` and are available in any Claude Code session.
 
 ### 1. Install memex
 
-Follow the install section of the [memex README](https://github.com/<user>/memex#install). That sets up `~/Development/memex/` and symlinks the `wiki-*` harness skills into `~/.claude/skills/` (user-scoped — reusable across any wiki-shaped project).
+Follow the install section of the [memex README](https://github.com/<user>/memex#install). That sets up `~/Development/memex/` and symlinks the `wiki-*` harness skills into `~/.claude/skills/`.
 
-### 2. Clone big_questions and symlink the inquiry skills into your instance
+### 2. Clone big_questions and symlink the inquiry skills user-scoped
 
 ```bash
 git clone https://github.com/<user>/big_questions ~/Development/big_questions
 
-# For an instance at <instance-path>:
 ln -s ~/Development/big_questions/skills/inquiry-elicit \
       ~/Development/big_questions/skills/inquiry-gap \
-      <instance-path>/.claude/skills/
+      ~/Development/big_questions/skills/inquiry-init \
+      ~/.claude/skills/
 ```
 
-**Why project-scoped, not user-scoped.** The inquiry skills carry domain assumptions (question pages, gap reports, elicitation workflow) that only make sense for an inquiry-instrument project. Installing them user-wide would pollute every other Claude Code project with slash commands that don't apply. memex's harness skills are domain-neutral and go user-scoped; big_questions' inquiry skills travel with the instance.
+Three symlinks, one command. `/inquiry-init`, `/inquiry-elicit`, and `/inquiry-gap` are now available in any Claude Code session.
+
+**Why user-scoped.** Keeping install locations consistent with memex removes a chicken-and-egg problem: `/inquiry-init` needs to be invocable *before* an inquiry instance exists, which rules out project-scoped installation. The minor cost — `/inquiry-elicit` and `/inquiry-gap` appear in autocomplete in non-inquiry sessions — matches how Claude Code's built-in skills work and is acceptable at v0.1.
 
 ## Bootstrap a new inquiry instance
 
 An **instance** is the folder holding your actual question wiki — the questions, the paste-ins, the gap reports. It is independent of this repo so skill development stays decoupled from question content.
 
-1. **Create the instance directory.** Any location works. For a vault-based instance (e.g. inside an Obsidian vault), a folder inside the vault is fine:
+One command, from any Claude Code session:
 
-    ```bash
-    mkdir -p <instance-path>
-    cd <instance-path>
-    ```
+```
+/inquiry-init <instance-path>
+```
 
-2. **Compose `SCHEMA.md`** by concatenating the memex base template and the inquiry addendum:
+For example: `/inquiry-init ~/vaults/MyVault/01_Projects/my_big_questions`.
 
-    ```bash
-    cat ~/Development/memex/schema.example.md \
-        ~/Development/big_questions/schema.inquiry.example.md \
-        > <instance-path>/SCHEMA.md
-    # Edit to customize voice, status vocabulary, instance-specific preferences.
-    ```
+The skill shells out to `helpers/init_inquiry.py`, which:
 
-3. **Create the directory structure** the skills expect:
+1. Checks that memex is installed (precondition — fails fast with a clear message if not).
+2. Invokes memex's `init_wiki.py --path <instance-path> --pages-dir questions` to build the generic directory tree (`wiki/questions/`, `raw/`, `meta/`, `SCHEMA.md` seeded from the memex base).
+3. Appends `schema.inquiry.example.md` onto the new `SCHEMA.md`, producing the composed inquiry schema.
 
-    ```bash
-    mkdir -p <instance-path>/wiki/questions \
-             <instance-path>/raw \
-             <instance-path>/meta \
-             <instance-path>/.claude/skills
-    ```
+The instance is now ready for `/inquiry-elicit`. Re-running `/inquiry-init` on the same path is idempotent (safe); pass `--force` to reseed `SCHEMA.md` from the templates after a schema update (question content is preserved).
 
-4. **Symlink skills** — memex's harness skills user-scoped (one-time, from the memex install above) and big_questions' inquiry skills project-scoped (per the [Install](#install) step above).
+### Manual bootstrap (if you prefer)
 
-Your instance is now ready for `/inquiry-elicit`.
+If you'd rather not use the helper, the equivalent is four shell commands:
+
+```bash
+mkdir -p <instance-path>/{wiki/questions,raw,meta,.claude/skills}
+touch <instance-path>/wiki/index.md <instance-path>/wiki/log.md
+cat ~/Development/memex/schema.example.md \
+    ~/Development/big_questions/schema.inquiry.example.md \
+    > <instance-path>/SCHEMA.md
+```
+
+No skill symlinking into the instance — the inquiry skills are user-scoped.
 
 ## Quickstart
 

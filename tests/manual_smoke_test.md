@@ -2,11 +2,11 @@
 
 Verifies `/inquiry-elicit`, `/wiki-ingest`, and `/inquiry-gap` end-to-end against a throwaway instance before P-001. Sub-agents cannot invoke slash commands — this is the human-in-the-loop half.
 
-Run in a **fresh Claude Code session** `cd`'d into the throwaway instance. Stop at the first unexpected result. Assumes memex is installed at `~/Development/memex/` with its `wiki-*` skills symlinked into `~/.claude/skills/`.
+Run in a **fresh Claude Code session** `cd`'d into the throwaway instance. Stop at the first unexpected result. Assumes memex AND big_questions are both installed user-scoped — all `wiki-*` and `inquiry-*` skills symlinked into `~/.claude/skills/` per the two repos' READMEs.
 
 ## Quick setup
 
-In a Claude Code session with the `inquiry-init` skill available (either user-scoped at `~/.claude/skills/inquiry-init/` or running from any directory where the skill is discoverable):
+From any Claude Code session (the `inquiry-init` skill is user-scoped, so it's always available):
 
 ```
 /inquiry-init /tmp/paul_elicit_smoke
@@ -27,7 +27,7 @@ Use this for debugging or if you're on a machine that doesn't have the `inquiry-
 ```bash
 # 1. Stage a throwaway instance.
 rm -rf /tmp/paul_elicit_smoke
-mkdir -p /tmp/paul_elicit_smoke/{wiki/questions,raw,meta,.claude/skills}
+mkdir -p /tmp/paul_elicit_smoke/{wiki/questions,raw,meta}
 
 # 2. Compose SCHEMA.md from base + inquiry addendum.
 cat ~/Development/memex/schema.example.md \
@@ -37,13 +37,8 @@ cat ~/Development/memex/schema.example.md \
 # 3. Seed empty wiki scaffolding.
 touch /tmp/paul_elicit_smoke/wiki/index.md /tmp/paul_elicit_smoke/wiki/log.md
 
-# 4. Project-scope the inquiry skills into the instance.
-ln -s ~/Development/big_questions/skills/inquiry-elicit \
-      /tmp/paul_elicit_smoke/.claude/skills/inquiry-elicit
-ln -s ~/Development/big_questions/skills/inquiry-gap \
-      /tmp/paul_elicit_smoke/.claude/skills/inquiry-gap
-
-# 5. Enter the instance and launch Claude Code.
+# 4. Enter the instance and launch Claude Code.
+#    No project-scoped symlinks needed — inquiry skills are user-scoped.
 cd /tmp/paul_elicit_smoke && claude
 ```
 
@@ -126,8 +121,7 @@ Verify: `ls /tmp/paul_elicit_smoke/meta/` shows two dated reports (or `_b` suffi
 
 ```bash
 rm -rf /tmp/paul_elicit_smoke
-# inquiry-skill symlinks were project-scoped to the instance — cleaned up with rm -rf above.
-# memex's user-scoped ~/.claude/skills/wiki-* symlinks stay (that's the intended install).
+# User-scoped ~/.claude/skills/ symlinks (wiki-*, inquiry-*) stay — that's the intended install.
 ```
 
 ## Known quirks
