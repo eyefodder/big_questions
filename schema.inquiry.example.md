@@ -70,7 +70,7 @@ once set, because contribution notes in other files cite them.
 ### Frontmatter
 
 Inquiry pages use the baseline frontmatter fields from the memex template
-with no domain-specific additions at Skateboard:
+with no domain-specific additions in v0.1:
 
 ```yaml
 ---
@@ -92,7 +92,7 @@ collapse. Framing (the 2–3 sentences of context) lives in the body's
 in `title` — the elicit, ingest, and gap skills all read it there.
 
 Instance customizations may add fields later (thematic tags, originating
-interview turn, etc.); none are required at Skateboard.
+interview turn, etc.); none are required in v0.1.
 
 ### Body structure
 
@@ -130,12 +130,12 @@ Rules:
 - The citation is a markdown link to the source file under `raw/`, using
   the relative-link convention from the base template.
 
-### Bicycle scope — deferred structure
+### Deferred structure
 
-At Skateboard, pages are **flat notes under `## Notes`**. A richer
-per-page schema — claims, evidence, contradictions, open threads — is
-explicitly **Bicycle scope** (PRD 6.2, 7/v0.2). When it lands, the
-baseline frontmatter above is chosen to survive the migration unchanged;
+In v0.1, pages are **flat notes under `## Notes`**. A richer per-page
+schema — claims, evidence, contradictions, open threads — is planned
+for a future revision (PRD 6.2, 7/v0.2). When it lands, the baseline
+frontmatter above is chosen to survive the migration unchanged;
 additional body sections will layer on without renaming `title`, `slug`,
 or `contributions`.
 
@@ -232,7 +232,7 @@ domain-shaped question.
   the interview transcript.
 - `## Notes` is present but empty at creation.
 - `wiki/index.md` is rebuilt to include the new pages.
-- One entry appended to `wiki/log.md` using the `elicit` verb (see Log
+- One entry appended to `meta/log.md` using the `elicit` verb (see Log
   Format Extensions below).
 
 ### Interview structure
@@ -260,10 +260,10 @@ into a question file.
   recommends a second pass on a later day. An 11-question set with real
   questions beats a 12-question set with one synthesized filler.
 
-### Bicycle scope — revision workflow
+### Deferred — revision workflow
 
 Revising, splitting, merging, or retiring questions after elicitation
-is **Bicycle scope**. At Skateboard, re-running `/inquiry-elicit`
+is planned for a future revision. In v0.1, re-running `/inquiry-elicit`
 against an existing set is not supported; the user edits pages directly
 or deletes and restarts.
 
