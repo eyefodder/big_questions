@@ -6,14 +6,16 @@ Usage:
 
 Shells out to memex's `helpers/init_wiki.py` to create the generic
 Karpathy-style wiki tree (with `wiki/questions/` as the pages subdir),
-then layers the inquiry-specific addendum onto `<target>/SCHEMA.md` and
-symlinks the inquiry skills (inquiry-elicit, inquiry-gap) into
-`<target>/.claude/skills/`.
+then appends the inquiry-specific addendum onto `<target>/SCHEMA.md`.
+
+Inquiry skills (inquiry-elicit, inquiry-gap, inquiry-init) are installed
+user-scoped at `~/.claude/skills/` per the big_questions README — same
+pattern as memex. This helper does not manage that install; it only
+bootstraps the instance content (SCHEMA.md + directory tree).
 
 Idempotent: re-running against a target that is already initialized
 will detect the addendum marker in SCHEMA.md and skip re-appending
-(unless --force is set). Existing correct symlinks are left in place.
-Conflicting symlinks (pointing elsewhere) cause exit 1.
+(unless --force is set).
 
 Stdlib only. Python 3.11+.
 """
@@ -34,8 +36,6 @@ ADDENDUM_MARKER = "<!-- Inquiry domain addendum — appends to memex/schema.exam
 # (big_questions/helpers/init_inquiry.py -> big_questions/).
 BIG_QUESTIONS_ROOT = Path(__file__).resolve().parent.parent
 ADDENDUM_PATH = BIG_QUESTIONS_ROOT / "schema.inquiry.example.md"
-SKILLS_ROOT = BIG_QUESTIONS_ROOT / "skills"
-INQUIRY_SKILLS = ("inquiry-elicit", "inquiry-gap")
 
 
 def eprint(msg: str) -> None:
@@ -62,8 +62,8 @@ def run_init_wiki(init_wiki: Path, target: Path, force: bool) -> tuple[bool, str
     would hard-fail. To preserve our own top-level idempotency contract
     (re-run without --force should be green when the instance is already
     initialized), we detect that state and skip the sub-call — returning
-    a synthetic stdout note. Steps 3/4 still run and will short-circuit on
-    their own idempotency checks.
+    a synthetic stdout note. The addendum step still runs and will
+    short-circuit on its own idempotency check.
     """
     schema_dst = target / "SCHEMA.md"
     if schema_dst.exists() and not force:
@@ -110,38 +110,6 @@ def append_addendum(target: Path, force: bool) -> str:
     return "re-appended (--force)" if already_present else "appended"
 
 
-def symlink_skill(name: str, target: Path) -> str:
-    """Ensure <target>/.claude/skills/<name> links to the skill in big_questions.
-
-    Returns a status string: "created", "already correct", or raises
-    RuntimeError on conflict.
-    """
-    source = SKILLS_ROOT / name
-    if not source.is_dir():
-        raise RuntimeError(f"source skill directory missing: {source}")
-    skills_dir = target / ".claude" / "skills"
-    skills_dir.mkdir(parents=True, exist_ok=True)
-    link = skills_dir / name
-
-    source_resolved = source.resolve()
-
-    if link.is_symlink() or link.exists():
-        # Already something here — check whether it resolves to our source.
-        try:
-            link_resolved = link.resolve()
-        except OSError as err:
-            raise RuntimeError(
-                f"could not resolve existing path at {link}: {err}")
-        if link_resolved == source_resolved:
-            return "already correct"
-        raise RuntimeError(
-            f"conflicting path at {link}: resolves to {link_resolved}, "
-            f"expected {source_resolved}. Remove it manually and re-run.")
-
-    os.symlink(source_resolved, link)
-    return "created"
-
-
 def main() -> int:
     parser = argparse.ArgumentParser(
         description="Bootstrap a new inquiry-instrument instance.")
@@ -184,26 +152,7 @@ def main() -> int:
                "Re-run once the issue is fixed.")
         return 1
 
-    # Step 4 — Symlink inquiry skills
-    symlink_status: dict[str, str] = {}
-    for skill in INQUIRY_SKILLS:
-        try:
-            symlink_status[skill] = symlink_skill(skill, target)
-        except (OSError, RuntimeError) as err:
-            eprint(str(err))
-            eprint("init_wiki completed and addendum applied, but "
-                   "symlinking did not finish. Resolve the conflict and "
-                   "re-run.")
-            # Partial-state summary
-            print("\nPartial init summary:", file=sys.stderr)
-            print(f"  init_wiki: ok", file=sys.stderr)
-            print(f"  addendum: {addendum_status}", file=sys.stderr)
-            for s, st in symlink_status.items():
-                print(f"  skill {s}: {st}", file=sys.stderr)
-            print(f"  skill {skill}: FAILED", file=sys.stderr)
-            return 1
-
-    # Step 5 — Final report
+    # Step 4 — Final report
     print("=" * 60)
     print(f"Inquiry instance initialized at {target}")
     print("=" * 60)
@@ -213,9 +162,6 @@ def main() -> int:
             print(f"  {line}")
     print("\n[inquiry layer]")
     print(f"  SCHEMA.md addendum: {addendum_status}")
-    for skill, status in symlink_status.items():
-        link_path = target / ".claude" / "skills" / skill
-        print(f"  skill {skill}: {status} ({link_path})")
     print("\nNext step: run `/inquiry-elicit` in this directory to begin "
           "eliciting your questions.")
     return 0
