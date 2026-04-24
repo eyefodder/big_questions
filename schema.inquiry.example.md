@@ -32,6 +32,14 @@ The vocabulary below is how we talk about the pieces.
   sentences of framing. Stored as a page under `wiki/questions/`. Each
   question has its own page; the page accumulates over time as sources are
   ingested.
+
+  Questions are simultaneously private and social artifacts. Privately, they
+  organize the user's attention — what to read for, what to mark as
+  relevant, what to ignore. Socially, they serve as conversation starters,
+  evidence of intellectual range, or a way of introducing oneself. A
+  well-crafted question works on both axes, and that constrains the form:
+  readable by someone who doesn't know the user, specific enough to be
+  genuinely theirs, short enough to land in one breath.
 - **Contribution** — a one-sentence note appended to a question's `## Notes`
   section when an ingested source advances that question. Exactly one
   contribution line per `(source, question)` pair, added by `/wiki-ingest`.
