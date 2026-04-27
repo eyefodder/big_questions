@@ -46,6 +46,54 @@ Read every active page in `wiki/questions/`: frontmatter (for slug and title) an
 - **Too-narrow** — a question so specific that almost no new source could advance it. The question is really an answer in disguise, or is about one case rather than a class of cases.
 - **Too-broad** — a question so abstract that no contribution would obviously count as advancing it. No imaginable paste-in would move the needle.
 
+### Set-level analysis — stance and domain categorisation (load-bearing)
+
+This step is required for every set-level run. It produces the two primary lenses the report's "At a glance" and "Headline finding" sections render. *Both lenses are needed*; either alone misses what the other surfaces.
+
+#### Stance categorisation
+
+Sort each active question into one of four intellectual stances:
+
+- **Builder / maker** — the user is designing, building, leading, or convening. Question form: "How do you build / lead / design X?" Destination is action.
+- **Observer / sense-maker** — the user is watching a pattern unfold and trying to understand it. Question form: "What is X actually doing? What patterns emerge?" Destination is interpretation.
+- **Critic / skeptic** — the user is interrogating a consensus. Question form: "Why is X assumed? What's wrong with the popular answer?" Destination is a sharpened argument against a prevailing view.
+- **Steward / preserver** — the user is asking what's at risk of being lost and what they'd fight to keep. Question form: "What about X is at risk? What's worth preserving?" Destination is a defensible claim about what to keep.
+
+Categorisation rules:
+- Look at the question form *as written* in the title. "How do you build...?" → maker. "What patterns emerge...?" → observer. "Why is X assumed?" → critic. "What about X is at risk?" → steward.
+- If form and stance disagree (e.g. "How do you build X?" but the framing makes clear the user isn't building, just wondering), flag it as a candidate for reframing in the **Audit — reframe candidates** sub-step below.
+- Empty stances are interesting. A 0-count critic or steward slot is a finding, not a defect — held visible in the negative-space table.
+
+#### Domain categorisation
+
+Sort the active questions into 4–7 topical domains drawn from the question titles, framings, and reading patterns. Aim for roughly 1–4 questions per domain. If a single domain holds more than half the set, look for a meaningful split (e.g. "AI in my own practice" vs "AI in the world").
+
+Naming conventions:
+- Use noun-phrase titles ("Leadership & org craft", "Innovation & invention", "AI markets, agents & products"), not verb-phrase ("Leading teams").
+- Group by what the question is *about* topically, not by stance. Two questions in the same domain may be different stances.
+- Confirm the bucketing with the user before locking it in — domain naming is a sense-making act and the user's framing matters.
+
+#### The cross-tab
+
+Once stances and domains are assigned, build a cross-tab — domains as rows, stances as columns, marginal totals on both axes. Read it for non-obvious patterns:
+
+- **Single-stance domains** — a domain with all its questions in one stance is structurally narrow. Sometimes right (Feynman favourites in observer mode); sometimes a reframe or addition signal.
+- **Complementary-stance domains** — a domain with two or more stances on the same body of practice is unusually well-developed (e.g. maker + steward on the same topic).
+- **Where maker stance lives** — maker questions tend to cluster in domains where the user has *first-person practice*. Maker questions in domains where the user has no practice are reframe candidates.
+- **Where observer stance lives** — observer questions tend to cluster where the user is honestly outside (a category they watch, not run).
+
+The cross-tab is data, not interpretation. Show it in the report only if it adds; cut it if the patterns it reveals are weak. Do not over-claim from it.
+
+#### Audit — interactive reframe loop
+
+For each maker question, ask the user directly: *"Are you actually going to act on this in the next year, or are you holding the topic at sense-making distance?"*
+
+**Do not trust the page's existing framing as evidence.** A page that claims "Personal stake: Paul is training an AI on his own creative work" may have inherited that line from a sloppy elicitation pass and never been challenged. Ask the user about *every* maker question, even when the framing already asserts first-person practice — especially then. The audit's job is to catch exactly the cases where the framing's self-description has drifted from the user's actual relationship to the topic.
+
+For each candidate, **show concrete text for both paths** (stay maker; reframe to observer with new title and framing). Let the user pick. Do not batch — one question per exchange. Update the report's stance counts as decisions land.
+
+This loop is interactive in the chat and mutates the report draft as it goes. Budget for several rounds with the user before the report is finalised. See **Interactive iteration** below.
+
 ### Within-question analysis — what to surface
 
 Read the single target page in full: frontmatter, `## Framing`, and every bullet in `## Notes`. Look for:
@@ -106,32 +154,84 @@ Non-obvious observations look like:
 
 ### 5. Rank and write the report
 
-Order observations with the single strongest (most non-obvious) first. The `## Summary` section leads with that observation verbatim or paraphrased — **not** with a generic "here is what I found" sentence.
+Order observations with the single strongest (most non-obvious) first. **That single strongest observation becomes the pull-quote callout at the very top of the report** — `> [!quote] What these questions reveal about you` — verbatim or paraphrased, identity-shaped, 2–3 sentences. It is the GIF anchor and the load-bearing claim of the entire artifact. If you cannot produce one, do not write the report (see Failure modes).
+
+The abstract callout that follows is roadmap-shaped, not insight-shaped — it tells the reader what's *in* the report (stance + domain breakdowns, richness ranking, negative-space map, decisions in appendix), not what the report concluded.
+
+The third callout — `> [!question] Questions you're not asking — that you might want to explore` — pulls three sample questions from the negative-space table's "not in set" rows (topics the user has signalled interest in but hasn't committed to a question on). Pick the most consumable framing from each row's four-stance options, or tighten as needed. Together the three callouts form the GIF arc: **identity insight → orientation → invitation**.
 
 Write to `meta/gap_report_<YYYY-MM-DD>.md`. If a file with that name already exists for today, append a suffix: `_b`, `_c`, etc.
 
-**Set-level file structure:**
+**Set-level file structure** (magazine voice — see **Voice and form** below):
 
 ```markdown
-# Gap Report — <YYYY-MM-DD> — set-level
+# Gap Report — <YYYY-MM-DD> — set-level (vN)
 
-## Summary
+> [!quote] What these questions reveal about you
+> <The single most non-obvious structural finding from the audit, as a 2–3 sentence pull quote. The GIF anchor — the one sentence the user couldn't have articulated by re-reading their own questions. Identity-shaped: what the set reveals about *how the user thinks*, not what the report contains. This is the load-bearing claim that earns the report its place; if no such finding emerged, do not write the report (see Failure modes).>
 
-<2–3 sentences. First sentence states the most non-obvious observation. Following sentences give context — how many questions analyzed, what else surfaced.>
+> [!abstract] What this report tells you about the questions you're asking
+> <2–3 sentence orientation. What the reader will find below — stance and domain breakdowns, richness ranking, negative-space map, decisions in appendix. Roadmap-shaped, NOT a restatement of the pull quote.>
 
-## Observations
+> [!question] Questions you're not asking — that you might want to explore
+> <Three sample questions pulled from the negative-space table's "not in set" rows (topics the user has signalled interest in but hasn't committed a question to). Format each as "**Topic** — *Question?*". Pick the most consumable framing from each row's four-stance options, or tighten if none of the four lands. Three is the right number for the GIF — fewer feels stingy, more is overwhelming. Invitation-shaped: don't prescribe; offer the slot.>
 
-### <Category heading — e.g. Implicit frames>
+## At a glance
 
-- **<One-line observation>**
-  <2–3 sentences of reasoning. Name the question(s) involved by slug. Suggest an action the user could take — sharpen, merge, add, retire.>
+### By stance
 
-### <Next category>
+| Stance | Count | |
+|---|---:|:---|
+| [[#Builder / maker]] | **N** | bar |
+| [[#Observer / sense-maker]] | **N** | bar |
+| [[#Steward / preserver]] | **N** | bar |
+| [[#Critic / skeptic]] | **N** | bar (or *(open slot)* if 0) |
 
-- **<One-line observation>**
-  <2–3 sentences of reasoning and action.>
+### By domain
 
-(...)
+| Domain | Count | |
+|---|---:|:---|
+| <Domain 1> | **N** | bar |
+| <Domain 2> | **N** | bar |
+| ... | | |
+
+**<N> active questions · <D> decisions resolved this session · <open slots> visible negative space**
+
+---
+
+## The headline finding
+
+<Magazine narrative section. Lead with the load-bearing finding. Use the cross-tab if it adds; cut if it over-interprets. Name the structural pattern (e.g. "your maker stance clusters in domains where you have first-person practice") only when clearly supported by the data.>
+
+---
+
+## Questions to sit with
+
+<3-5 reflection prompts the user can bring back to the report. Lead each with the question, in bold.>
+
+---
+
+## How rich are these questions?
+
+<Tier 1 / Tier 2 / Tier 3 grouping with one-line caveats per question. Use full question titles linked to wiki pages, not slugs.>
+
+---
+
+## What you're not asking
+
+<Negative-space table. Topics × four stances. Bolded cells are existing questions (linked to wiki pages); unbolded cells are candidate questions in the user's voice. Include a few topics the user has signalled interest in but hasn't yet asked a question on.>
+
+---
+
+## Appendix — what changed this session
+
+<Decisions made during the session, marked ✓ RESOLVED with the choice and a brief explanation. The working-notes section, deliberately below the magazine top.>
+
+---
+
+## Appendix — the four stances
+
+<Definitions of each stance. Anchor targets for the [[#Heading]] links from the deck. Each definition includes "Question form", "What accumulates", and "In your set" with bulleted question titles linked to wiki pages.>
 ```
 
 **Within-question file structure** — identical, except replace `## Observations` with `## Within-question observations — <slug>` and drop any category heading that has no observations:
@@ -154,6 +254,23 @@ Write to `meta/gap_report_<YYYY-MM-DD>.md`. If a file with that name already exi
 ```
 
 If the `within` mode is auto-suggested and confirmed right after a `set` run, produce two separate files (one per mode), not a combined file. Dated filenames plus the mode-in-title make both scannable in `meta/`.
+
+### 5a. Voice and form
+
+The report is read as a finished artifact. Write it as one.
+
+**Magazine voice, not AI essay.** See feedback memory `feedback_magazine_voice.md` for full guidance. Key rules:
+- Cut hedges and intensifiers ("honestly", "actually", "deliberately", "in roughly equal measure").
+- No self-narration ("the non-obvious pattern is..." — just write the pattern).
+- Don't restate data after showing it. Trust the reader.
+- Lead each paragraph with the strongest sentence.
+- Don't over-interpret. If the data only weakly supports a claim, don't claim it.
+
+**Show concrete text when proposing changes.** See `feedback_show_concrete_text.md`. When iterating on titles, framings, or report content, show actual draft text inline — not abstract descriptions of what would change.
+
+**Use full question titles, not slugs.** When referencing questions in narrative prose (deck, headline finding, appendix), write the full title (italics, in quotes, or both) and link to the wiki page. Slugs belong in filenames and frontmatter, not in the body of a magazine read.
+
+**Anchor links to the appendix.** Use Obsidian wiki-link syntax (`[[#Heading Name]]`) for in-document jumps to stance definitions. Appendix headings are the anchor targets; no `<a id>` tags needed.
 
 ### 6. Update `meta/gap_report_latest.md`
 
@@ -276,6 +393,33 @@ After the file is written, tell the user where it is and offer the issue-templat
 > Saved your feedback to `meta/feedback_gap_<YYYY-MM-DD>.md`. If you'd like to share it back to help improve the skill, file an issue using this template: https://github.com/eyefodder/big_questions/issues/new?template=skill_feedback.yml — no pressure, it's your file.
 
 Keep the tone warm and low-friction. The file is the user's by default; sharing is opt-in.
+
+## Interactive iteration
+
+The gap report is a working document, not a one-shot artifact. Set-level runs typically produce 3–7 versions during a single session as the user iterates with you on:
+
+- Stance categorisation (some questions may need reframing)
+- Domain naming and grouping
+- Voice and structure of the report itself
+- Decisions surfaced by the analysis (retire, reframe, add)
+
+**Versioning conventions:**
+- The version number (v1, v2, v3, …) goes in the report's H1 title in parentheses.
+- The filename uses the dated convention `gap_report_<YYYY-MM-DD>.md`. Same-day iterations append `_b`, `_c`, etc.
+- Update `meta/gap_report_latest.md` (symlink) to the most recent version after each iteration.
+
+**Decisions section** (in the report's appendix):
+As the user makes calls during the session, mark decisions as ✓ RESOLVED with the choice and a brief explanation. Decisions left open should be visible too, with their choices laid out (Path A / Path B / Path C with what each costs).
+
+**Page-batch step** (only after all decisions are resolved and the user signs off):
+- Update reframed pages (new titles, new framings, retained slugs per schema).
+- Mark retired pages (`status: retired`, append a retirement callout *at the bottom of the page* — never at the top — so the index helper picks the framing as the summary line.)
+- Create new pages with full frontmatter, framing, and empty `## Notes`.
+- Rebuild `wiki/index.md` via `helpers/index_update.py`.
+- Append a single `gap-report` log entry covering all changes via `helpers/log_append.py`.
+
+**Skill update step** (when learnings emerge):
+If the session surfaces a behavioural rule worth keeping (a new pattern to look for, a voice rule, a structural change), capture it as a memory file (feedback type) in the user's auto-memory and reference it in this skill rather than duplicating the rule inline. Memory survives across sessions; inline duplication rots.
 
 ## Helper invocation
 
