@@ -1,6 +1,6 @@
 # big_questions
 
-**big_questions** is an inquiry-instrument layer on top of the [memex](https://github.com/eyefodder/memex) LLM-wiki harness. It adds three Claude Code skills — `/inquiry-init` to bootstrap an instance, `/inquiry-elicit` to conduct a structured interview and produce your ~12 big questions, and `/inquiry-gap` to run gap analysis against them. You keep a small, explicit set of questions; the model watches what you're missing.
+**big_questions** is an inquiry-instrument layer on top of the [memex](https://github.com/eyefodder/memex) LLM-wiki harness. It adds four Claude Code skills — `/inquiry-init` to bootstrap an instance, `/inquiry-elicit` to conduct a structured interview and produce your ~12 big questions, `/inquiry-gap` to run gap analysis against them, and `/inquiry-synthesize` to turn an accumulating question page into a magazine-style synthesis with a TL;DR brief and forward-looking "threads to pull". You keep a small, explicit set of questions; the model watches what you're missing — and starts to surface what the body of articles is saying when read together.
 
 The intellectual lineage is the "twelve favorite problems" practice attributed to Richard Feynman and documented by Gian-Carlo Rota in [*Ten Lessons I Wish I Had Been Taught*](https://www.ams.org/notices/199701/comm-rota.pdf) (Notices of the AMS, 1997) — keep a dozen of your favorite problems constantly in mind, and test every new idea against them. memex supplies the generic wiki harness; big_questions specializes it for this inquiry domain.
 
@@ -11,6 +11,7 @@ The intellectual lineage is the "twelve favorite problems" practice attributed t
 | [`skills/inquiry-init/`](./skills/inquiry-init/SKILL.md) | Claude Code skill — one-command bootstrap for a new inquiry instance: creates the directory tree and composes `SCHEMA.md` from the memex base plus the inquiry addendum. |
 | [`skills/inquiry-elicit/`](./skills/inquiry-elicit/SKILL.md) | Claude Code skill — runs a 15–20 minute structured interview, a negative-space check against your sustained-attention signals, and an ordering step. Writes 8–12 question pages under `wiki/questions/` and a shareable ordered list at `wiki/my_open_questions.md`. |
 | [`skills/inquiry-gap/`](./skills/inquiry-gap/SKILL.md) | Claude Code skill — produces gap reports at two scopes: **set-level** (across all active questions) and **within-question** (on any page with at least three contributions). |
+| [`skills/inquiry-synthesize/`](./skills/inquiry-synthesize/SKILL.md) | Claude Code skill — for any question page with at least three contributions, produces three layered artifacts in one pass: a magazine-style **Synthesis** (the article-shape of what the corpus is saying, with claim-shaped headings navigable in Obsidian outline view), a **TL;DR** briefing, and a **Threads to pull** callout with horizon-opening provocations and concrete patterns to look out for. See [`examples/question_page_synthesis.md`](./examples/question_page_synthesis.md) for a worked output. |
 | [`helpers/init_inquiry.py`](./helpers/init_inquiry.py) | Python CLI invoked by `/inquiry-init`; shells out to memex's `init_wiki.py` and layers the inquiry addendum onto `SCHEMA.md`. |
 | [`schema.inquiry.example.md`](./schema.inquiry.example.md) | Inquiry-specific schema addendum. Appends onto `memex/schema.example.md` to define question pages, contribution notes, gap reports, and elicitation conventions. |
 
@@ -31,12 +32,13 @@ Follow the install section of the [memex README](https://github.com/eyefodder/me
 ```bash
 git clone https://github.com/eyefodder/big_questions ~/Development/big_questions
 mkdir -p ~/.claude/skills
-ln -s ~/Development/big_questions/skills/inquiry-init    ~/.claude/skills/
-ln -s ~/Development/big_questions/skills/inquiry-elicit  ~/.claude/skills/
-ln -s ~/Development/big_questions/skills/inquiry-gap     ~/.claude/skills/
+ln -s ~/Development/big_questions/skills/inquiry-init        ~/.claude/skills/
+ln -s ~/Development/big_questions/skills/inquiry-elicit      ~/.claude/skills/
+ln -s ~/Development/big_questions/skills/inquiry-gap         ~/.claude/skills/
+ln -s ~/Development/big_questions/skills/inquiry-synthesize  ~/.claude/skills/
 ```
 
-Then **restart Claude Code** so it picks up the new skills. `/inquiry-init`, `/inquiry-elicit`, and `/inquiry-gap` are now available in any Claude Code session.
+Then **restart Claude Code** so it picks up the new skills. `/inquiry-init`, `/inquiry-elicit`, `/inquiry-gap`, and `/inquiry-synthesize` are now available in any Claude Code session.
 
 **Why user-scoped.** Keeping install locations consistent with memex removes a chicken-and-egg problem: `/inquiry-init` needs to be invocable *before* an inquiry instance exists, which rules out project-scoped installation. The minor cost — `/inquiry-elicit` and `/inquiry-gap` appear in autocomplete in non-inquiry sessions — matches how Claude Code's built-in skills work and is acceptable at v0.1.
 
@@ -128,6 +130,7 @@ Once an instance is bootstrapped and the question set is written, the full skill
 - **[`/wiki-query`](https://github.com/eyefodder/memex#whats-in-the-box)** (memex) — ask a question against the wiki; get an answer synthesized from contributions with citations, optionally filed back as a new page.
 - **[`/wiki-lint`](https://github.com/eyefodder/memex#whats-in-the-box)** (memex) — health check: mechanical integrity pass (frontmatter, broken links, orphans, stale dates) plus an LLM pass for contradictions and missing cross-references.
 - **[`/inquiry-gap`](./skills/inquiry-gap/SKILL.md)** (this repo) — gap report at set-level (default) or within a single page (`/inquiry-gap within <slug>`). Required to surface at least one non-obvious observation per run; a generic report is worse than no report.
+- **[`/inquiry-synthesize`](./skills/inquiry-synthesize/SKILL.md)** (this repo) — once a question page has accumulated at least three contributions, turns the stack of pull-quotes-with-rationales into three layered artifacts: a magazine-style synthesis voiced as a meta-opinion (what the corpus, read together, says — not your stance), a scannable TL;DR briefing, and a "Threads to pull" callout with horizon-opening provocations and concrete patterns to look out for. The synthesis uses claim-shaped h3/h4 headings so the Obsidian outline view reads as a navigation map. See [`examples/question_page_synthesis.md`](./examples/question_page_synthesis.md) for a worked output.
 
 ## Schema composition model
 
@@ -153,7 +156,7 @@ The file is yours by default — it stays local and is never uploaded anywhere a
 
 ## Status
 
-**v0.1.** Question elicitation (with negative-space check and ordered-set output), set-level gap, within-question gap, one-command bootstrap. Revision and retirement workflows, automated ingestion, and semi-automated write-ups are planned for future revisions.
+**v0.1.** Question elicitation (with negative-space check and ordered-set output), set-level gap, within-question gap, page synthesis with TL;DR and Threads to pull, one-command bootstrap. Revision and retirement workflows, automated ingestion, semi-automated write-ups, and a synthesis-diff mechanic ("what changed since last week") are planned for future revisions.
 
 ## License
 
